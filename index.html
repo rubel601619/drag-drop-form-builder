@@ -114,7 +114,7 @@
                class="dropable"
                ref="dropZone"
                @dragover.prevent
-               @drop="onDrop">
+               @drop="onDrop($event)">
                <div
                   v-for="(field, index) in dropFields"
                   :key="field.uid"
@@ -200,7 +200,7 @@
                      Math.random().toString(36).substring(2, 6)
                   );
                },
-               onDrop() {
+               onDrop(event) {
                   const newField = {
                      uid: this.generateUID(),
                      type: this.dragType,
@@ -214,7 +214,28 @@
                            : "Choose option",
                      value: this.dragType === "select" ? ["Option 1"] : [],
                   };
-                  this.dropFields.push(newField);
+
+                  // Find the element at the drop position
+                  const dropZone = this.$refs.dropZone;
+                  const children = Array.from(dropZone.children);
+
+                  // Get mouse Y coordinate of drop
+                  const mouseY = event.clientY;
+
+                  // Find index where to insert
+                  let insertIndex = children.length; // default at the end
+
+                  for (let i = 0; i < children.length; i++) {
+                     const rect = children[i].getBoundingClientRect();
+                     // If mouse is above the center of this child, insert here
+                     if (mouseY < rect.top + rect.height / 2) {
+                        insertIndex = i;
+                        break;
+                     }
+                  }
+
+                  // Insert new field at the calculated index
+                  this.dropFields.splice(insertIndex, 0, newField);
                   this.selectedField = newField;
                },
                selectField(field) {
