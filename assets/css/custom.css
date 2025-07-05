@@ -1,0 +1,12 @@
+.dropable {
+   min-height: 300px;
+   border: 1px solid #dee2e6;
+   padding: 1rem;
+}
+
+label,
+label > span {
+   font-size: 14px;
+   font-weight: 600;
+   color: var(--bs-primary);
+}

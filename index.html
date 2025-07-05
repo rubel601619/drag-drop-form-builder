@@ -3,275 +3,210 @@
    <head>
       <meta charset="UTF-8" />
       <title>Vue Drag Drop Form Builder</title>
-      <script src="https://unpkg.com/vue@3"></script>
-      <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-      <style>
-         #app {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            user-select: none;
-         }
 
-         #app > div {
-            width: 33%;
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-         }
-
-         .fields > div,
-         .dropable > div {
-            margin: 5px 0;
-            padding: 8px;
-            border: 1px dashed #aaa;
-            background: #f9f9f9;
-            position: relative;
-            cursor: move;
-         }
-         .active-field {
-            background: #def;
-         }
-         .remove-btn {
-            position: absolute;
-            top: 4px;
-            right: 6px;
-            background: red;
-            color: white;
-            border: none;
-            padding: 2px 6px;
-            font-size: 12px;
-            cursor: pointer;
-            border-radius: 3px;
-         }
-         .field-settings input,
-         .field-settings label {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-         }
-         .option-list {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 5px;
-         }
-         .option-list input {
-            flex: 1;
-         }
-         .save-btn {
-            padding: 8px 12px;
-            margin-top: 15px;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-         }
-         .dropable {
-            min-height: 300px;
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-         }
-      </style>
+      <link rel="stylesheet" href="./assets/css/bootstrap.min.css" />
+      <link rel="stylesheet" href="./assets/css/custom.css" />
+      <script src="./assets/js/vue-unpkg.js"></script>
+      <script src="./assets/js/sortable.min.js"></script>
    </head>
    <body>
-      <div id="app">
-         <div class="left-side">
-            <div class="fields">
-               <div draggable="true" @dragstart="dragStart('text')">
-                  Text Field
-               </div>
-               <div draggable="true" @dragstart="dragStart('select')">
-                  Select Field
-               </div>
-            </div>
+      <div id="app" class="small">
+         <div class="container-fluid py-4" style="max-width: 1700px">
+            <div class="row g-4">
+               <div class="col-3">
+                  <div class="left-side">
+                     <div class="row row-cols-2 mb-3 g-3">
+                        <div
+                           class="col"
+                           v-for="(field, index) in elementFields"
+                           :key="index">
+                           <div
+                              draggable="true"
+                              @dragstart="dragStart(field)"
+                              class="border bg-light px-2 py-3 text-center text-uppercase small">
+                              {{field}}
+                           </div>
+                        </div>
+                     </div>
 
-            <div class="field-settings" v-if="selectedField">
-               <h4>Field Settings</h4>
-               <label>Label</label>
-               <input v-model="selectedField.label" />
-               <label>Placeholder</label>
-               <input v-model="selectedField.placeholder" />
-               <div v-if="selectedField.type === 'select'">
-                  <label>Options</label>
-                  <div
-                     v-for="(opt, idx) in selectedField.value"
-                     :key="idx"
-                     class="option-list">
-                     <input v-model="selectedField.value[idx]" />
-                     <button @click="removeOption(idx)">❌</button>
+                     <hr />
+
+                     <div class="field-settings border" v-if="selectedField">
+                        <h3
+                           class="fs-5 fw-medium m-0 px-3 py-2 bg-light border-bottom">
+                           Field Settings
+                        </h3>
+                        <div class="p-3 d-grid gap-2">
+                           <div class="border p-2 pt-1 bg-light">
+                              <label class="d-block">
+                                 <span>Label</span>
+                                 <input
+                                    v-model="selectedField.label"
+                                    class="form-control form-control-sm shadow-none rounded-0" />
+                              </label>
+                           </div>
+                           <div
+                              class="border p-2 pt-1 bg-light"
+                              v-if="selectedField.type !== 'hyperlink' && selectedField.type !== 'select'">
+                              <label class="d-block">
+                                 <span>Placeholder</span>
+                                 <input
+                                    v-model="selectedField.placeholder"
+                                    class="form-control form-control-sm shadow-none rounded-0" />
+                              </label>
+                           </div>
+                           <div
+                              class="border p-2 pt-1 bg-light"
+                              v-if="selectedField.type === 'select'">
+                              <span class="text-primary">Select options</span>
+                              <div
+                                 class="input-group mb-2 bg-light"
+                                 v-for="(opt, idx) in selectedField.value"
+                                 :key="idx">
+                                 <input
+                                    type="text"
+                                    class="form-control form-control-sm rounded-0 shadow-none"
+                                    v-model="selectedField.value[idx]"
+                                    placeholder="username" />
+                                 <button
+                                    type="button"
+                                    class="input-group-text rounded-0 px-2"
+                                    id="basic-addon1"
+                                    @click="removeOption(idx)">
+                                    <svg
+                                       xmlns="http://www.w3.org/2000/svg"
+                                       height="20px"
+                                       viewBox="0 -960 960 960"
+                                       width="20px"
+                                       fill="#ff0000">
+                                       <path
+                                          d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z" />
+                                    </svg>
+                                 </button>
+                              </div>
+                              <hr />
+                              <button
+                                 class="btn btn-success btn-sm rounded-0 px-4"
+                                 @click="addOption">
+                                 Add
+                              </button>
+                           </div>
+                           <div
+                              v-if="selectedField.type === 'hyperlink'"
+                              class="border p-2 pt-1 bg-light">
+                              <label class="d-block">
+                                 <span>Link</span>
+                                 <input
+                                    type="url"
+                                    v-model="selectedField.url"
+                                    class="form-control form-control-sm shadow-none rounded-0" />
+                              </label>
+                           </div>
+                        </div>
+                     </div>
+
+                     <hr />
+
+                     <button
+                        class="btn btn-primary rounded-0 px-4"
+                        @click="saveToLocalStorage">
+                        Save Changes
+                     </button>
                   </div>
-                  <button @click="addOption">+ Add Option</button>
                </div>
-            </div>
+               <div class="col-6 user-select-none">
+                  <div
+                     class="dropable d-flex gap-3 flex-column"
+                     ref="dropZone"
+                     @dragover.prevent
+                     @drop="onDrop($event)">
+                     <div
+                        v-for="(field, index) in dropFields"
+                        :key="field.uid"
+                        class="draggable-item border p-2 bg-light pt-1"
+                        :data-id="field.uid"
+                        @click="selectField(field)"
+                        :class="{ 'active-field': selectedField && selectedField.uid === field.uid }">
+                        <div
+                           class="d-flex align-items-center justify-content-between bg-light">
+                           <label for=""
+                              >{{ field.label }} -
+                              <span class="small text-body opacity-75"
+                                 >[{{ field.type }}]</span
+                              ></label
+                           >
+                           <button
+                              class="btn btn-sm rounded-0 text-danger p-1 py-0 pe-0"
+                              @click.stop="removeField(index)">
+                              <svg
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 height="20px"
+                                 viewBox="0 -960 960 960"
+                                 width="20px"
+                                 fill="#ff0000">
+                                 <path
+                                    d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z" />
+                              </svg>
+                           </button>
+                        </div>
 
-            <button class="save-btn" @click="saveToLocalStorage">
-               Save Changes
-            </button>
-         </div>
-
-         <div class="right-side">
-            <h3>Drop Area</h3>
-            <div
-               class="dropable"
-               ref="dropZone"
-               @dragover.prevent
-               @drop="onDrop($event)">
-               <div
-                  v-for="(field, index) in dropFields"
-                  :key="field.uid"
-                  class="draggable-item"
-                  :data-id="field.uid"
-                  @click="selectField(field)"
-                  :class="{ 'active-field': selectedField && selectedField.uid === field.uid }">
-                  <button class="remove-btn" @click.stop="removeField(index)">
-                     ✖
-                  </button>
-                  {{ field.label }} ({{ field.type }})<br />
-                  <small>{{ field.placeholder }}</small>
+                        <input
+                           type="text"
+                           disabled
+                           class="form-control rounded-0"
+                           :placeholder="field.placeholder" />
+                     </div>
+                  </div>
                </div>
-            </div>
-         </div>
-         <hr />
+               <div class="col-3">
+                  <div class="border">
+                     <h3
+                        class="fs-5 fw-medium m-0 px-3 py-2 bg-light border-bottom">
+                        Preview
+                     </h3>
+                     <div class="p-3 d-grid gap-3">
+                        <div
+                           v-for="(field, index) in dropFields"
+                           :key="field.uid"
+                           class="border p-2 pt-1">
+                           <label :for="'field-' + index" class="mb-1 small"
+                              >{{ field.label }}</label
+                           >
 
-         <div class="preview">
-            <h3>Preview</h3>
-            <div
-               v-for="(field, index) in dropFields"
-               :key="field.uid"
-               style="margin-bottom: 10px">
-               <label :for="'field-' + index">{{ field.label }}</label>
+                           <!-- Text Field -->
+                           <input
+                              v-if="isInputField && field.type !== 'select' && field.type !== 'hyperlink'"
+                              class="form-control form-control-sm rounded-0 shadow-none"
+                              :id="'field-' + index"
+                              :type="field.type"
+                              :placeholder="field.placeholder" />
 
-               <!-- Text Field -->
-               <input
-                  v-if="field.type === 'text'"
-                  :id="'field-' + index"
-                  type="text"
-                  :placeholder="field.placeholder" />
+                           <!-- Select Field -->
+                           <select
+                              v-if="field.type === 'select'"
+                              :id="'field-' + index"
+                              class="form-select form-select-sm rounded-0 shadow-none">
+                              <option
+                                 v-for="(opt, i) in field.value"
+                                 :key="i"
+                                 :value="opt">
+                                 {{ opt }}
+                              </option>
+                           </select>
 
-               <!-- Select Field -->
-               <select
-                  v-else-if="field.type === 'select'"
-                  :id="'field-' + index">
-                  <option v-for="(opt, i) in field.value" :key="i" :value="opt">
-                     {{ opt }}
-                  </option>
-               </select>
+                           <a
+                              v-if="field.type === 'hyperlink'"
+                              :href="field.url"
+                              >{{field.label}}</a
+                           >
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
 
-      <script>
-         const { createApp, nextTick } = Vue;
-
-         createApp({
-            data() {
-               return {
-                  dropFields: JSON.parse(
-                     localStorage.getItem("formFields") || "[]"
-                  ),
-                  selectedField: null,
-                  dragType: "",
-               };
-            },
-            mounted() {
-               nextTick(() => {
-                  new Sortable(this.$refs.dropZone, {
-                     animation: 150,
-                     handle: ".draggable-item",
-                     onEnd: (evt) => {
-                        const movedItem = this.dropFields.splice(
-                           evt.oldIndex,
-                           1
-                        )[0];
-                        this.dropFields.splice(evt.newIndex, 0, movedItem);
-                     },
-                     // prevent Sortable from cloning or inserting DOM directly
-                     ghostClass: "ghost",
-                     forceFallback: true,
-                  });
-               });
-            },
-            methods: {
-               dragStart(type) {
-                  this.dragType = type;
-               },
-               generateUID() {
-                  return (
-                     Date.now().toString() +
-                     Math.random().toString(36).substring(2, 6)
-                  );
-               },
-               onDrop(event) {
-                  const newField = {
-                     uid: this.generateUID(),
-                     type: this.dragType,
-                     label:
-                        this.dragType === "text"
-                           ? "Text Field"
-                           : "Select Field",
-                     placeholder:
-                        this.dragType === "text"
-                           ? "Enter text"
-                           : "Choose option",
-                     value: this.dragType === "select" ? ["Option 1"] : [],
-                  };
-
-                  // Find the element at the drop position
-                  const dropZone = this.$refs.dropZone;
-                  const children = Array.from(dropZone.children);
-
-                  // Get mouse Y coordinate of drop
-                  const mouseY = event.clientY;
-
-                  // Find index where to insert
-                  let insertIndex = children.length; // default at the end
-
-                  for (let i = 0; i < children.length; i++) {
-                     const rect = children[i].getBoundingClientRect();
-                     // If mouse is above the center of this child, insert here
-                     if (mouseY < rect.top + rect.height / 2) {
-                        insertIndex = i;
-                        break;
-                     }
-                  }
-
-                  // Insert new field at the calculated index
-                  this.dropFields.splice(insertIndex, 0, newField);
-                  this.selectedField = newField;
-               },
-               selectField(field) {
-                  this.selectedField = field;
-               },
-               addOption() {
-                  if (
-                     this.selectedField &&
-                     this.selectedField.type === "select"
-                  ) {
-                     this.selectedField.value.push("");
-                  }
-               },
-               removeOption(index) {
-                  if (
-                     this.selectedField &&
-                     this.selectedField.type === "select"
-                  ) {
-                     this.selectedField.value.splice(index, 1);
-                  }
-               },
-               saveToLocalStorage() {
-                  localStorage.setItem(
-                     "formFields",
-                     JSON.stringify(this.dropFields)
-                  );
-                  alert("Saved!");
-               },
-               removeField(index) {
-                  if (this.dropFields[index].uid === this.selectedField?.uid) {
-                     this.selectedField = null;
-                  }
-                  this.dropFields.splice(index, 1);
-               },
-            },
-         }).mount("#app");
-      </script>
+      <script src="./assets/js/form-builder.js"></script>
    </body>
 </html>
